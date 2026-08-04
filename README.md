@@ -8,7 +8,7 @@
   </a>
   <img src="https://img.shields.io/badge/platform-linux-lightgrey?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/bash-%3E%3D4.0-yellow?style=flat-square&logo=gnu-bash" alt="Bash">
-  <a href="https://t.me/firewallfalcons">
+  <a href="https://t.me/zhgddm">
     <img src="https://img.shields.io/badge/Telegram-Channel-blue?style=flat-square&logo=telegram" alt="Telegram">
   </a>
 </div>
@@ -75,11 +75,7 @@ Easily spin up entire tunneling infrastructures onto your server without touchin
 
 ## 💬 Community & Support
 
-* **Telegram Channel:** [t.me/firewallfalcons](https://t.me/firewallfalcons) - Join for updates and support!
-* **Donations:** If you find this project useful and want to support its development, you can contribute via:
-    * **PayPal:** [paypal.me/00xmahmoud](https://paypal.me/00xmahmoud)
-    * **Binance ID:** `885652061`
-    * **USDT (TRC20):** `TM2AfVAWQJiuriGC6KoTmsAJuUTTBd2f1R`
+* **Telegram Channel:** [t.me/zhgddm](https://t.me/zhgddm) - Join for updates and support!
 
 ---
 
