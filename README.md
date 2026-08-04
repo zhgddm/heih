@@ -3,8 +3,8 @@
   <h1>🦅 FirewallFalcon Manager v4.0.0</h1>
   <p><b>The ultimate, lightning-fast, and beautiful terminal UI manager for VPN tunneling, protocol deployments, and advanced user administration on Linux servers.</b></p>
   
-  <a href="https://github.com/FirewallFalconsLabs/FirewallFalcon-Manager/releases">
-    <img src="https://img.shields.io/github/v/release/FirewallFalconsLabs/FirewallFalcon-Manager?style=flat-square&color=success" alt="Latest Release">
+  <a href="https://github.com/zhgddm/sshh/releases">
+    <img src="https://img.shields.io/github/v/release/zhgddm/sshh?style=flat-square&color=success" alt="Latest Release">
   </a>
   <img src="https://img.shields.io/badge/platform-linux-lightgrey?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/bash-%3E%3D4.0-yellow?style=flat-square&logo=gnu-bash" alt="Bash">
@@ -29,7 +29,7 @@ It takes less than a minute to deploy the complete FirewallFalcon Manager on you
 
 ### Primary Method (Recommended)
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/FirewallFalconsLabs/FirewallFalcon-Manager/main/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/zhgddm/sshh/main/install.sh)
 ```
 
 *(Once installed, simply type `menu` in your terminal to launch the interface!)*

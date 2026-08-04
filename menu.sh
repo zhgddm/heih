@@ -75,7 +75,7 @@ PANEL_HTML_FILE="$DB_DIR/panel/index.html"
 PANEL_CONF="$DB_DIR/panel.conf"
 PANEL_SERVICE_FILE="/etc/systemd/system/firewallfalcon-panel.service"
 PANEL_PORT=44380
-PANEL_REPO_BASE="https://raw.githubusercontent.com/FirewallFalconsLabs/FirewallFalcon-Manager/main/panel"
+PANEL_REPO_BASE="https://raw.githubusercontent.com/zhgddm/sshh/main/panel"
 
 # --- ZiVPN Variables ---
 ZIVPN_DIR="/etc/zivpn"
@@ -2232,10 +2232,10 @@ install_udp_custom() {
     arch=$(uname -m)
     local binary_url=""
     if [[ "$arch" == "x86_64" ]]; then
-        binary_url="https://raw.githubusercontent.com/FirewallFalconsLabs/FirewallFalcon-Manager/main/udp/udp-custom-linux-amd64"
+        binary_url="https://raw.githubusercontent.com/zhgddm/sshh/main/udp/udp-custom-linux-amd64"
         echo -e "${C_BLUE}ℹ️ Detected x86_64 (amd64) architecture.${C_RESET}"
     elif [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
-        binary_url="https://raw.githubusercontent.com/FirewallFalconsLabs/FirewallFalcon-Manager/main/udp/udp-custom-linux-arm"
+        binary_url="https://raw.githubusercontent.com/zhgddm/sshh/main/udp/udp-custom-linux-arm"
         echo -e "${C_BLUE}ℹ️ Detected ARM64 architecture.${C_RESET}"
     else
         echo -e "\n${C_RED}❌ Unsupported architecture: $arch. Cannot install udp-custom.${C_RESET}"
@@ -3404,7 +3404,7 @@ install_falcon_proxy() {
     fi
 
     echo -e "\n${C_BLUE}🌐 Fetching available versions from GitHub...${C_RESET}"
-    local releases_json=$(curl -s "https://api.github.com/repos/FirewallFalconsLabs/FirewallFalcon-Manager/releases")
+    local releases_json=$(curl -s "https://api.github.com/repos/zhgddm/sshh/releases")
     if [[ -z "$releases_json" || "$releases_json" == "[]" ]]; then
         echo -e "${C_RED}❌ Error: Could not fetch releases. Check internet or API limits.${C_RESET}"
         return
@@ -3469,7 +3469,7 @@ install_falcon_proxy() {
     fi
     
     # Construct download URL based on selected version
-    local download_url="https://github.com/FirewallFalconsLabs/FirewallFalcon-Manager/releases/download/$SELECTED_VERSION/$binary_name"
+    local download_url="https://github.com/zhgddm/sshh/releases/download/$SELECTED_VERSION/$binary_name"
 
     echo -e "\n${C_GREEN}📥 Downloading Falcon Proxy $SELECTED_VERSION ($binary_name)...${C_RESET}"
     wget -q --show-progress -O "$FALCONPROXY_BINARY" "$download_url"
