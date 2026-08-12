@@ -499,13 +499,13 @@ delete_firewallfalcon_user_accounts() {
 
 require_interactive_terminal() {
     if [[ ! -t 0 || ! -t 1 ]]; then
-        echo -e "${C_RED}❌ Error: The FirewallFalcon menu must be run from an interactive terminal.${C_RESET}"
+        echo -e "${C_RED}❌ Error: The SSHWS menu must be run from an interactive terminal.${C_RESET}"
         exit 1
     fi
 }
 
 initial_setup() {
-    echo -e "${C_BLUE}⚙️ Initializing FirewallFalcon Manager setup...${C_RESET}"
+    echo -e "${C_BLUE}⚙️ Initializing SSHWS Manager setup...${C_RESET}"
     check_environment
     
     ensure_firewallfalcon_dirs
@@ -679,7 +679,7 @@ setup_limiter_service() {
     # Combined limiter + bandwidth monitoring
     cat > "$LIMITER_SCRIPT" << 'EOF'
 #!/bin/bash
-# FirewallFalcon limiter version 2026-07-23.4
+# SSHWS limiter version 2026-07-23.4
 DB_FILE="/etc/firewallfalcon/users.db"
 BW_DIR="/etc/firewallfalcon/bandwidth"
 PID_DIR="$BW_DIR/pidtrack"
@@ -1032,7 +1032,7 @@ EOF
 
     cat > "$LIMITER_SERVICE" << EOF
 [Unit]
-Description=FirewallFalcon Active User Limiter
+Description=SSHWS Active User Limiter
 After=network.target
 
 [Service]
@@ -1065,7 +1065,7 @@ EOF
 }
 
 sync_runtime_components_if_needed() {
-    local limiter_marker="# FirewallFalcon limiter version 2026-07-23.8"
+    local limiter_marker="# SSHWS limiter version 2026-07-23.8"
     cleanup_legacy_bandwidth_runtime
     setup_trial_cleanup_script >/dev/null 2>&1
     if [[ ! -f "$LIMITER_SCRIPT" ]] || ! grep -Fqx "$limiter_marker" "$LIMITER_SCRIPT" 2>/dev/null; then
@@ -1109,7 +1109,7 @@ cleanup_legacy_bandwidth_runtime() {
 setup_trial_cleanup_script() {
     cat > "$TRIAL_CLEANUP_SCRIPT" << 'TREOF'
 #!/bin/bash
-# FirewallFalcon Trial Account Auto-Cleanup
+# SSHWS Trial Account Auto-Cleanup
 # Usage: firewallfalcon-trial-cleanup.sh <username>
 DB_FILE="/etc/firewallfalcon/users.db"
 BW_DIR="/etc/firewallfalcon/bandwidth"
@@ -1190,7 +1190,7 @@ update_ssh_banners_config() {
 
     ensure_firewallfalcon_dirs
     tmp_conf="/tmp/ff_banners_new.conf"
-    echo "# FirewallFalcon - Dynamic per-user SSH banners" > "$tmp_conf"
+    echo "# SSHWS - Dynamic per-user SSH banners" > "$tmp_conf"
 
     if [[ -f "$DB_FILE" ]]; then
         while IFS=: read -r u _rest; do
@@ -1425,7 +1425,7 @@ _select_multi_user_interface() {
     if [[ ${#all_users[@]} -eq 0 ]]; then
         echo -e "${C_YELLOW}ℹ️ No users found in the manager database.${C_RESET}"
         if [[ "$include_orphan_users" == "true" ]]; then
-            echo -e "${C_DIM}No orphan FirewallFalcon system users were found either.${C_RESET}"
+            echo -e "${C_DIM}No orphan SSHWS system users were found either.${C_RESET}"
         fi
         SELECTED_USERS=("NO_USERS"); return
     fi
@@ -1569,14 +1569,14 @@ create_user() {
         return
     fi
     if db_has_user "$username"; then
-        echo -e "\n${C_RED}❌ Error: User '$username' already exists in FirewallFalcon.${C_RESET}"
+        echo -e "\n${C_RED}❌ Error: User '$username' already exists in SSHWS.${C_RESET}"
         return
     fi
     if id "$username" &>/dev/null; then
         if is_firewallfalcon_orphan_user "$username"; then
             echo -e "\n${C_YELLOW}⚠️ User '$username' already exists on the system but is missing from users.db.${C_RESET}"
             echo -e "${C_DIM}This usually happens after uninstalling the script without deleting the SSH users.${C_RESET}"
-            read -p "👉 Do you want to take control of this existing user and manage it with FirewallFalcon? (y/n): " adopt_confirm
+            read -p "👉 Do you want to take control of this existing user and manage it with SSHWS? (y/n): " adopt_confirm
             if [[ "$adopt_confirm" == "y" || "$adopt_confirm" == "Y" ]]; then
                 adopt_existing=true
             else
@@ -1584,7 +1584,7 @@ create_user() {
                 return
             fi
         else
-            echo -e "\n${C_RED}❌ Error: System user '$username' already exists and does not look like a FirewallFalcon SSH account.${C_RESET}"
+            echo -e "\n${C_RED}❌ Error: System user '$username' already exists and does not look like a SSHWS SSH account.${C_RESET}"
             return
         fi
     fi
@@ -1630,7 +1630,7 @@ create_user() {
     
     clear; show_banner
     if [[ "$adopt_existing" == "true" ]]; then
-        echo -e "${C_GREEN}✅ Existing system user '$username' has been imported into FirewallFalcon!${C_RESET}\n"
+        echo -e "${C_GREEN}✅ Existing system user '$username' has been imported into SSHWS!${C_RESET}\n"
     else
         echo -e "${C_GREEN}✅ User '$username' created successfully!${C_RESET}\n"
     fi
@@ -1654,7 +1654,7 @@ create_user() {
 }
 
 delete_user() {
-    _select_multi_user_interface "--- 🗑️ Delete FirewallFalcon Users ---" "true"
+    _select_multi_user_interface "--- 🗑️ Delete SSHWS Users ---" "true"
     if [[ ${#SELECTED_USERS[@]} -eq 0 || "${SELECTED_USERS[0]}" == "NO_USERS" ]]; then return; fi
     
     echo -e "\n${C_RED}⚠️ You selected ${#SELECTED_USERS[@]} user(s) to delete: ${C_YELLOW}${SELECTED_USERS[*]}${C_RESET}"
@@ -2102,7 +2102,7 @@ _enable_banner_in_sshd_config() {
     disable_dynamic_ssh_banner_system
     sed -i.bak -E 's/^( *Banner *).*/#\1/' /etc/ssh/sshd_config
     if ! grep -q -E "^Banner $SSH_BANNER_FILE" /etc/ssh/sshd_config; then
-        echo -e "\n# FirewallFalcon SSH Banner\nBanner $SSH_BANNER_FILE" >> /etc/ssh/sshd_config
+        echo -e "\n# SSHWS SSH Banner\nBanner $SSH_BANNER_FILE" >> /etc/ssh/sshd_config
     fi
     echo -e "${C_GREEN}✅ sshd_config updated.${C_RESET}"
 }
@@ -2296,7 +2296,7 @@ EOF
     echo -e "\n${C_GREEN}📝 Creating udpgw systemd service file...${C_RESET}"
     cat > "$UDPGW_SERVICE_FILE" <<EOF
 [Unit]
-Description=FirewallFalcon UDPGW Backend
+Description=SSHWS UDPGW Backend
 After=network.target
 
 [Service]
@@ -2313,7 +2313,7 @@ EOF
     echo -e "\n${C_GREEN}📝 Creating systemd service file...${C_RESET}"
     cat > "$UDP_CUSTOM_SERVICE_FILE" <<EOF
 [Unit]
-Description=UDP Custom by FirewallFalcon
+Description=UDP Custom by SSHWS
 After=network.target
 
 [Service]
@@ -2998,7 +2998,7 @@ install_ssl_tunnel() {
     echo -e "   • Loopback SSL decryptor on ${C_WHITE}${HAPROXY_INTERNAL_DECRYPT_PORT}${C_RESET}"
 
     if [ -f "$HAPROXY_CONFIG" ] || [ -f "$NGINX_CONFIG_FILE" ]; then
-        echo -e "\n${C_YELLOW}⚠️ Existing HAProxy/Nginx configs will be replaced with the FirewallFalcon edge layout.${C_RESET}"
+        echo -e "\n${C_YELLOW}⚠️ Existing HAProxy/Nginx configs will be replaced with the SSHWS edge layout.${C_RESET}"
         read -p "👉 Continue with the replacement? (y/n): " confirm_replace
         if [[ "$confirm_replace" != "y" && "$confirm_replace" != "Y" ]]; then
             echo -e "${C_RED}❌ Installation cancelled.${C_RESET}"
@@ -3763,7 +3763,7 @@ purge_nginx() {
     rm -f "${NGINX_CONFIG_FILE}.bak.firewallfalcon"
     rm -f "$NGINX_PORTS_FILE"
     if [[ "$mode" != "silent" ]]; then
-        echo -e "\n${C_GREEN}✅ Internal Nginx proxy purged. Shared FirewallFalcon certificates were kept.${C_RESET}"
+        echo -e "\n${C_GREEN}✅ Internal Nginx proxy purged. Shared SSHWS certificates were kept.${C_RESET}"
     fi
 }
 
@@ -3773,7 +3773,7 @@ install_nginx_proxy() {
     echo -e "\n${C_CYAN}This keeps HAProxy on ${EDGE_PUBLIC_HTTP_PORT}/${EDGE_PUBLIC_TLS_PORT} and rewrites the internal Nginx proxy on ${NGINX_INTERNAL_HTTP_PORT}/${NGINX_INTERNAL_TLS_PORT}.${C_RESET}"
 
     if [ ! -s "$SSL_CERT_FILE" ] || [ ! -s "$SSL_CERT_CHAIN_FILE" ] || [ ! -s "$SSL_CERT_KEY_FILE" ]; then
-        echo -e "\n${C_YELLOW}⚠️ No shared FirewallFalcon certificate was found.${C_RESET}"
+        echo -e "\n${C_YELLOW}⚠️ No shared SSHWS certificate was found.${C_RESET}"
         echo -e "${C_DIM}Running the full HAProxy edge installer so the certificate and both services stay aligned.${C_RESET}"
         install_ssl_tunnel
         return
@@ -4203,7 +4203,7 @@ show_banner() {
     refresh_banner_cache
     [[ -t 1 ]] && clear
     echo
-    echo -e "${C_TITLE}   FirewallFalcon Manager ${C_RESET}${C_DIM}| v4.0.0 Premium Edition${C_RESET}"
+    echo -e "${C_TITLE}   SSHWS Manager ${C_RESET}${C_DIM}| v4.0.0 Premium Edition${C_RESET}"
     echo -e "${C_BLUE}   ─────────────────────────────────────────────────────────${C_RESET}"
     printf "   ${C_GRAY}%-10s${C_RESET} %-20s ${C_GRAY}|${C_RESET} %s\n" "OS" "$BANNER_CACHE_OS_NAME" "Uptime: $BANNER_CACHE_UP_TIME"
     printf "   ${C_GRAY}%-10s${C_RESET} %-20s ${C_GRAY}|${C_RESET} %s\n" "Memory" "${BANNER_CACHE_RAM_USAGE}% Used" "Online Sessions: ${C_WHITE}${BANNER_CACHE_ONLINE_USERS}${C_RESET}"
@@ -4241,8 +4241,6 @@ protocol_menu() {
         echo -e "     ${C_ACCENT}--- TUNNELLING PROTOCOLS---${C_RESET}"
         printf "     ${C_CHOICE}[ 1]${C_RESET} %-45s %s\n" "🚀 Install badvpn (UDP 7300)" "$badvpn_status"
         printf "     ${C_CHOICE}[ 2]${C_RESET} %-45s\n" "🗑️ Uninstall badvpn"
-        printf "     ${C_CHOICE}[ 3]${C_RESET} %-45s %s\n" "🚀 Install udp-custom" "$udp_custom_status"
-        printf "     ${C_CHOICE}[ 4]${C_RESET} %-45s\n" "🗑️ Uninstall udp-custom"
         printf "     ${C_CHOICE}[ 5]${C_RESET} %-45s %s\n" "🔒 Install ${ssl_tunnel_text}" "$ssl_tunnel_status"
         printf "     ${C_CHOICE}[ 6]${C_RESET} %-45s\n" "🗑️ Uninstall HAProxy Edge Stack"
         printf "     ${C_CHOICE}[ 7]${C_RESET} %-45s %s\n" "📡 Install/View DNSTT (Port 53)" "$dnstt_status"
@@ -4254,8 +4252,6 @@ protocol_menu() {
         printf "     ${C_CHOICE}[15]${C_RESET} %-45s\n" "🗑️ Uninstall ZiVPN"
         
         echo -e "     ${C_ACCENT}--- 💻 MANAGEMENT PANELS ---${C_RESET}"
-        printf "     ${C_CHOICE}[12]${C_RESET} %-45s %s\n" "💻 Install X-UI / 3X-UI Panel" "$xui_status"
-        printf "     ${C_CHOICE}[13]${C_RESET} %-45s\n" "🗑️ Uninstall X-UI / 3X-UI Panel"
         
         echo -e "   ${C_DIM}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${C_RESET}"
         echo -e "     ${C_WARN}[ 0]${C_RESET} ↩️ Return"
@@ -4266,12 +4262,10 @@ protocol_menu() {
         fi
         case $choice in
             1) install_badvpn; press_enter ;; 2) uninstall_badvpn; press_enter ;;
-            3) install_udp_custom; press_enter ;; 4) uninstall_udp_custom; press_enter ;;
             5) install_ssl_tunnel; press_enter ;; 6) uninstall_ssl_tunnel; press_enter ;;
             7) install_dnstt; press_enter ;; 8) uninstall_dnstt; press_enter ;;
             9) install_falcon_proxy; press_enter ;; 10) uninstall_falcon_proxy; press_enter ;;
             11) nginx_proxy_menu ;;
-            12) install_panel_menu; press_enter ;; 13) uninstall_xui_panel; press_enter ;;
             14) install_zivpn; press_enter ;; 15) uninstall_zivpn; press_enter ;;
             0) return ;;
             *) invalid_option ;;
@@ -4346,7 +4340,7 @@ PEOF
     # Create systemd service
     cat > "$PANEL_SERVICE_FILE" <<-SEOF
 [Unit]
-Description=FirewallFalcon Web Control Panel
+Description=SSHWS Web Control Panel
 After=network-online.target
 Wants=network-online.target
 
@@ -4568,7 +4562,7 @@ uninstall_script() {
     local remove_users_on_uninstall=false
     mapfile -t removable_users < <(get_firewallfalcon_known_users)
     if [[ ${#removable_users[@]} -gt 0 ]]; then
-        echo -e "\n${C_YELLOW}FirewallFalcon SSH users detected on this VPS:${C_RESET} ${removable_users[*]}"
+        echo -e "\n${C_YELLOW}SSHWS SSH users detected on this VPS:${C_RESET} ${removable_users[*]}"
         read -p "👉 Do you also want to permanently delete these SSH users before uninstalling? (y/n): " remove_users_confirm
         if [[ "$remove_users_confirm" == "y" || "$remove_users_confirm" == "Y" ]]; then
             remove_users_on_uninstall=true
@@ -4578,7 +4572,7 @@ uninstall_script() {
     echo -e "\n${C_BLUE}--- 💥 Starting Uninstallation 💥 ---${C_RESET}"
     
     if [[ "$remove_users_on_uninstall" == "true" ]]; then
-        echo -e "\n${C_BLUE}🗑️ Removing FirewallFalcon SSH users before uninstall...${C_RESET}"
+        echo -e "\n${C_BLUE}🗑️ Removing SSHWS SSH users before uninstall...${C_RESET}"
         delete_firewallfalcon_user_accounts "${removable_users[@]}"
     fi
     
@@ -4606,7 +4600,6 @@ uninstall_script() {
     purge_nginx "silent"
     uninstall_dnstt
     uninstall_badvpn
-    uninstall_udp_custom
     uninstall_ssl_tunnel
     uninstall_falcon_proxy
     uninstall_zivpn
@@ -4763,7 +4756,7 @@ create_trial_account() {
 }
 
 view_user_bandwidth() {
-    _select_user_interface "--- 📊 View User Bandwidth ---"
+    _select_user_interface "--- 📊 查看账号流量 ---"
     local u=$SELECTED_USER
     if [[ "$u" == "NO_USERS" || -z "$u" ]]; then return; fi
     
@@ -4822,7 +4815,7 @@ view_user_bandwidth() {
 
 bulk_create_users() {
     clear; show_banner
-    echo -e "${C_BOLD}${C_PURPLE}--- 👥 Bulk Create Users ---${C_RESET}"
+    echo -e "${C_BOLD}${C_PURPLE}--- 👥 批量创建账号 ---${C_RESET}"
     
     read -p "👉 Enter username prefix (e.g., 'user'): " prefix
     if [[ -z "$prefix" ]]; then echo -e "\n${C_RED}❌ Prefix cannot be empty.${C_RESET}"; return; fi
@@ -5274,64 +5267,128 @@ main_menu() {
     while true; do
         export UNINSTALL_MODE="interactive"
         show_banner
-        
         echo
-        echo -e "   ${C_TITLE}═══════════════════[ ${C_BOLD}👤 USER MANAGEMENT ${C_RESET}${C_TITLE}]═══════════════════${C_RESET}"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "1" "✨ Create New User" "2" "🗑️  Delete User"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "3" "🔄 Renew User Account" "4" "🔒 Lock User Account"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "5" "🔓 Unlock User Account" "6" "✏️  Edit User Details"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "7" "📋 List Managed Users" "8" "📱 Generate Client Config"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "9" "⏱️  Create Trial Account" "10" "📊 View User Bandwidth"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "11" "👥 Bulk Create Users"
-        
-        echo
-        echo -e "   ${C_TITLE}══════════════[ ${C_BOLD}🌐 VPN & PROTOCOLS ${C_RESET}${C_TITLE}]═══════════════${C_RESET}"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "12" "🔌 Protocol Manager" "13" "📈 Traffic Monitor (Lite)"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "14" "🚫 Block Torrent (Anti-P2P)"
+
+        echo -e "   ${C_TITLE}══════════════════[ ${C_BOLD}👤 账号管理 ${C_RESET}${C_TITLE}]══════════════════${C_RESET}"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "1" "👤  Account Management"
 
         echo
-        echo -e "   ${C_TITLE}══════════════[ ${C_BOLD}⚙️ SYSTEM SETTINGS ${C_RESET}${C_TITLE}]═══════════════${C_RESET}"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "15" "🌐 Free Domain (deSEC)" "16" "🎨 SSH Banner Config"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "17" "🔄 Auto-Reboot Task" "18" "💾 Backup User Data"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "19" "📥 Restore User Data" "20" "🧹 Cleanup Expired Users"
-        printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "21" "🌐 Web Control Panel"
+        echo -e "   ${C_TITLE}══════════════════[ ${C_BOLD}🌐 协议管理 ${C_RESET}${C_TITLE}]══════════════════${C_RESET}"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "2" "🔌  Protocol Manager"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "3" "📱  Generate Client Config"
 
         echo
-        echo -e "   ${C_DANGER}═══════════════════[ ${C_BOLD}🔥 DANGER ZONE ${C_RESET}${C_DANGER}]═══════════════════${C_RESET}"
-        echo -e "     ${C_DANGER}[99]${C_RESET} Uninstall Script             ${C_WARN}[ 0]${C_RESET} Exit"
+        echo -e "   ${C_TITLE}══════════════════[ ${C_BOLD}⚙️ 系统与其他 ${C_RESET}${C_TITLE}]══════════════════${C_RESET}"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "4" "📈  Traffic Monitor (Lite)"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "5" "🚫  Block Torrent (Anti-P2P)"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "6" "🌐  Free Domain (deSEC)"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "7" "🎨  SSH Banner Config"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "8" "🔄  Auto-Reboot Task"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "9" "💾  Backup User Data"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "10" "📥  恢复账号数据"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "11" "🧹  清理过期账号"
+        printf "     ${C_CHOICE}[%2s]${C_RESET} %-32s\n" "12" "🌐  Web 控制面板"
+
         echo
+        echo -e "   ${C_DANGER}═══════════════════[ ${C_BOLD}🔥 危险区域 ${C_RESET}${C_DANGER}]═══════════════════${C_RESET}"
+        echo -e "     ${C_DANGER}[99]${C_RESET} 卸载脚本"
+        echo -e "     ${C_WARN}[ 0]${C_RESET} 退出"
+        echo
+
         if ! read -r -p "$(echo -e ${C_PROMPT}"👉 Select an option: "${C_RESET})" choice; then
             echo
             exit 0
         fi
+
         case $choice in
-            1) create_user; press_enter ;;
-            2) delete_user; press_enter ;;
-            3) renew_user; press_enter ;;
-            4) lock_user; press_enter ;;
-            5) unlock_user; press_enter ;;
-            6) edit_user; press_enter ;;
-            7) list_users; press_enter ;;
-            8) client_config_menu; press_enter ;;
-            9) create_trial_account; press_enter ;;
-            10) view_user_bandwidth; press_enter ;;
-            11) bulk_create_users; press_enter ;;
-            
-            12) protocol_menu ;;
-            13) traffic_monitor_menu ;;
-            14) torrent_block_menu ;;
-            
-            15) dns_menu; press_enter ;;
-            16) ssh_banner_menu ;;
-            17) auto_reboot_menu ;;
-            18) backup_user_data; press_enter ;;
-            19) restore_user_data; press_enter ;;
-            20) cleanup_expired; press_enter ;;
-            21) web_panel_menu ;;
-            
-            99) uninstall_script ;;
-            0) exit 0 ;;
-            *) invalid_option ;;
+            # 1 = 原来的整套 User Management
+            1)
+                while true; do
+                    clear
+                    show_banner
+                    echo
+                    echo -e "   ${C_TITLE}═══════════════════[ ${C_BOLD}👤 账号管理 ${C_RESET}${C_TITLE}]═══════════════════${C_RESET}"
+                    printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "1" "✨  Create New User" "2" "🗑️  删除账号"
+                    printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "3" "🔄 续期账号" "4" "🔒 锁定账号"
+                    printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "5" "🔓 解锁账号" "6" "✏️  编辑账号信息"
+                    printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "7" "📋 查看账号列表" "8" "📊 查看账号流量"
+                    printf "     ${C_CHOICE}[%2s]${C_RESET} %-28s ${C_CHOICE}[%2s]${C_RESET} %-28s\n" "9" "⏱️  创建试用账号" "10" "👥 批量创建账号"
+                    echo
+                    echo -e "     ${C_RED}[ 0]${C_RESET} ⬅️  返回"
+                    echo
+
+                    read -r -p "$(echo -e ${C_PROMPT}"👉 Select an option: "${C_RESET})" user_choice || return
+
+                    case $user_choice in
+                        1) create_user; press_enter ;;
+                        2) delete_user; press_enter ;;
+                        3) renew_user; press_enter ;;
+                        4) lock_user; press_enter ;;
+                        5) unlock_user; press_enter ;;
+                        6) edit_user; press_enter ;;
+                        7) list_users; press_enter ;;
+                        8) view_user_bandwidth; press_enter ;;
+                        9) create_trial_account; press_enter ;;
+                        10) bulk_create_users; press_enter ;;
+                        0) break ;;
+                        *) invalid_option ;;
+                    esac
+                done
+                ;;
+
+            # 2 = 原来的 Protocol Manager，协议名字和安装逻辑完全不动
+            2)
+                protocol_menu
+                ;;
+
+            # 3 = 原来主菜单的 8：Generate Client Config
+            3)
+                client_config_menu
+                press_enter
+                ;;
+
+            # 以下保留原来 13~21 的功能，只重新编号
+            4)
+                traffic_monitor_menu
+                ;;
+            5)
+                torrent_block_menu
+                ;;
+            6)
+                dns_menu
+                press_enter
+                ;;
+            7)
+                ssh_banner_menu
+                ;;
+            8)
+                auto_reboot_menu
+                ;;
+            9)
+                backup_user_data
+                press_enter
+                ;;
+            10)
+                restore_user_data
+                press_enter
+                ;;
+            11)
+                cleanup_expired
+                press_enter
+                ;;
+            12)
+                web_panel_menu
+                ;;
+
+            99)
+                uninstall_script
+                ;;
+            0)
+                exit 0
+                ;;
+            *)
+                invalid_option
+                ;;
         esac
     done
 }
